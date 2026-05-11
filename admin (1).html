@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALFA ELECTRIC — لوحة الإدارة</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --red: #cc1111;
+    --red-dark: #991010;
+    --red-glow: rgba(204,17,17,0.12);
+    --red-border: rgba(204,17,17,0.35);
+    --gold: #c9a227;
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f0f0;
+    --muted: #777;
+    --green: #22c55e;
+    --yellow: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans Arabic', sans-serif; min-height: 100vh; }
+
+  /* ═══ LOGIN ═══ */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--red-border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    width: 340px;
+    text-align: center;
+  }
+
+  .login-logo {
+    width: 62px; height: 62px;
+    background: var(--red);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; color: #fff;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 0 30px rgba(204,17,17,0.2);
+  }
+
+  .login-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .login-sub   { font-size: 12px; color: var(--muted); margin-bottom: 2rem; }
+
+  .login-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 15px;
+    padding: 12px 14px;
+    outline: none;
+    text-align: center;
+    letter-spacing: 3px;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+    direction: ltr;
+  }
+  .login-input:focus { border-color: var(--red); }
+
+  .login-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--red);
+    border: none; border-radius: 8px;
+    color: #fff;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .login-btn:hover { background: var(--red-dark); }
+
+  .login-error {
+    font-size: 12px; color: #f87171;
+    margin-top: 10px; display: none;
+  }
+
+  /* ═══ DASHBOARD ═══ */
+  #dashboard { display: none; }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--red-border);
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    position: sticky; top: 0; z-index: 10;
+  }
+
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 36px; height: 36px; background: var(--red); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
+  .logo-text { font-size: 15px; font-weight: 600; }
+  .logo-sub  { font-size: 11px; color: var(--muted); }
+
+  .hdr-actions { display: flex; align-items: center; gap: 10px; }
+
+  .hdr-badge {
+    background: var(--red-glow);
+    border: 1px solid var(--red-border);
+    color: var(--red);
+    font-size: 11px; padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .hdr-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 12px; padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .hdr-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .sync-btn {
+    background: var(--red-glow);
+    border: 1px solid var(--red-border);
+    border-radius: 6px;
+    color: var(--red);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 12px; padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .sync-btn:hover { background: var(--red); color: #fff; }
+  .sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .main { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+  }
+
+  .toolbar-title { font-size: 20px; font-weight: 600; }
+  .toolbar-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .filter-sel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 13px; padding: 8px 12px;
+    cursor: pointer; outline: none;
+    transition: border-color 0.2s;
+  }
+  .filter-sel:focus { border-color: var(--red); }
+  .filter-sel option { background: #1a1a1a; }
+
+  /* KPI Grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .kpi-card:hover { border-color: var(--red-border); transform: translateY(-2px); }
+  .kpi-card.highlight { border-color: var(--red-border); background: var(--red-glow); }
+
+  .kpi-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+  .kpi-card.highlight .kpi-value { color: var(--red); }
+  .kpi-sub   { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  /* Charts */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  .chart-title { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 1rem; }
+
+  /* Branches Grid */
+  .branches-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .branch-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    display: flex; align-items: center; gap: 12px;
+    transition: border-color 0.2s;
+  }
+  .branch-row:hover { border-color: var(--red-border); }
+
+  .br-num {
+    width: 32px; height: 32px;
+    background: var(--red-glow);
+    border: 1px solid var(--red-border);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--red);
+    flex-shrink: 0;
+  }
+  .br-info { flex: 1; }
+  .br-name { font-size: 13px; font-weight: 500; }
+  .br-rev  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .br-ach  { font-size: 13px; font-weight: 700; }
+
+  /* Table */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .table-hdr {
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-hdr-title { font-size: 14px; font-weight: 500; }
+
+  .export-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 12px; padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .export-btn:hover { border-color: var(--green); color: var(--green); }
+
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 820px;
+  }
+
+  thead th {
+    background: var(--surface2);
+    padding: 10px 14px;
+    text-align: right;
+    font-weight: 500; font-size: 11px;
+    color: var(--muted); letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  td { padding: 11px 14px; color: var(--text); white-space: nowrap; }
+
+  .sbadge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 3px 10px;
+    font-size: 12px;
+  }
+  .sdot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+
+  .apill {
+    display: inline-block;
+    border-radius: 4px; padding: 2px 8px;
+    font-size: 11px; font-weight: 600;
+  }
+  .ag { background: rgba(34,197,94,.12); color: #4ade80; }
+  .am { background: rgba(251,191,36,.12); color: #fbbf24; }
+  .al { background: rgba(204,17,17,.12);  color: #f87171; }
+
+  .empty {
+    text-align: center;
+    padding: 3rem;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* Section header */
+  .sec-hdr {
+    font-size: 13px; font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sec-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  @media (max-width: 768px) {
+    .kpi-grid     { grid-template-columns: repeat(2, 1fr); }
+    .charts-row   { grid-template-columns: 1fr; }
+    .branches-grid{ grid-template-columns: 1fr; }
+    .main         { padding: 1rem; }
+    header        { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">AE</div>
+    <div class="login-title">لوحة إدارة المتاجر</div>
+    <div class="login-sub">ALFA ELECTRIC — Store Operations Portal</div>
+    <input type="password" class="login-input" id="pwIn" placeholder="••••••••"
+           onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">دخول</button>
+    <div class="login-error" id="loginErr">كلمة المرور غير صحيحة</div>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="dashboard">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">AE</div>
+      <div>
+        <div class="logo-text">ALFA ELECTRIC</div>
+        <div class="logo-sub">لوحة عمليات المتاجر</div>
+      </div>
+    </div>
+    <div class="hdr-actions">
+      <div class="hdr-badge">طرابلس + بنغازي • 8 فروع</div>
+      <button class="sync-btn" id="syncBtn" onclick="loadData()">🔄 تحديث</button>
+      <a href="./store_form.html" class="hdr-btn">🏪 بوابة الفروع</a>
+      <button class="hdr-btn" onclick="logout()">خروج</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div>
+        <div class="toolbar-title">ملخص الأداء اليومي</div>
+        <div class="toolbar-sub" id="syncLabel">آخر تحديث: —</div>
+      </div>
+      <div class="filters">
+        <select class="filter-sel" id="fRegion" onchange="renderAll()">
+          <option value="">كل المناطق</option>
+          <option value="طرابلس">طرابلس</option>
+          <option value="بنغازي">بنغازي</option>
+        </select>
+        <select class="filter-sel" id="fStore" onchange="renderAll()">
+          <option value="">كل الفروع</option>
+          <option>حي الأثاري</option>
+          <option>قرجي</option>
+          <option>الكريمية</option>
+          <option>زناتة</option>
+          <option>الشط</option>
+          <option>الهواري 1</option>
+          <option>الهواري 2</option>
+          <option>المجوري</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card highlight">
+        <div class="kpi-label">إجمالي الإيرادات</div>
+        <div class="kpi-value" id="k-rev">0 د.ل</div>
+        <div class="kpi-sub"  id="k-rev-s">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">إجمالي الزوار</div>
+        <div class="kpi-value" id="k-foot">0</div>
+        <div class="kpi-sub"  id="k-foot-s">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">إجمالي الفواتير</div>
+        <div class="kpi-value" id="k-trans">0</div>
+        <div class="kpi-sub"  id="k-conv">معدل تحويل: —</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">متوسط الفاتورة</div>
+        <div class="kpi-value" id="k-avg">—</div>
+        <div class="kpi-sub">د.ل / فاتورة</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">الإيرادات حسب الفرع</div>
+        <canvas id="cRev" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">توزيع الفئات</div>
+        <canvas id="cCat" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Branches -->
+    <div class="sec-hdr">أداء الفروع</div>
+    <div class="branches-grid" id="branchesGrid"></div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-hdr">
+        <div class="table-hdr-title">سجل العمليات التفصيلي</div>
+        <button class="export-btn" onclick="exportCSV()">⬇ تصدير CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>وقت الإرسال</th>
+              <th>التاريخ</th>
+              <th>الفرع</th>
+              <th>المنطقة</th>
+              <th>الإيرادات</th>
+              <th>الزوار</th>
+              <th>الفواتير</th>
+              <th>التحويل</th>
+              <th>متوسط الفاتورة</th>
+              <th>المرتجعات</th>
+              <th>NPS</th>
+              <th>الإنجاز</th>
+            </tr>
+          </thead>
+          <tbody id="tBody">
+            <tr><td colspan="12" class="empty">جاري تحميل البيانات...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const PASSWORD = 'Alfa2026';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxhbjgJ1-rekjb645dOqjQfKv-CGex0cB73yvghtr5740e2Jh8eLJ87uYiPtL13WEnv5Q/exec';
+
+const STORE_REGION = {
+  'حي الأثاري':'طرابلس','قرجي':'طرابلس','الكريمية':'طرابلس','زناتة':'طرابلس','الشط':'طرابلس',
+  'الهواري 1':'بنغازي','الهواري 2':'بنغازي','المجوري':'بنغازي'
+};
+
+let allData  = [];
+let chartRev = null;
+let chartCat = null;
+
+/* ── تسجيل الدخول ── */
+function doLogin() {
+  if (document.getElementById('pwIn').value === PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display   = 'block';
+    loadData();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function logout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashboard').style.display   = 'none';
+  document.getElementById('pwIn').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+}
+
+/* ── جلب البيانات ── */
+async function loadData() {
+  const btn = document.getElementById('syncBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري التحميل...';
+
+  try {
+    const res = await fetch(SHEET_URL + '?t=' + Date.now(), { method:'GET' });
+    const json = await res.json();
+
+    if (json.result === 'success' && json.data && json.data.length > 0) {
+      allData = json.data.map(r => ({
+        ts:           r['وقت الإرسال']  || r.ts          || '',
+        date:         r['التاريخ']       || r.date        || '',
+        storeNum:     r['رقم الفرع']     || r.storeNum    || '',
+        storeName:    r['اسم الفرع']     || r.storeName   || '',
+        region:       r['المنطقة']       || r.region      || STORE_REGION[r.storeName] || '',
+        revenue:      parseFloat(r['الإيرادات']   || r.revenue)      || 0,
+        footfall:     parseFloat(r['الزوار']       || r.footfall)     || 0,
+        transactions: parseFloat(r['الفواتير']     || r.transactions) || 0,
+        returns:      parseFloat(r['المرتجعات']    || r.returns)      || 0,
+        appliances:   parseFloat(r['أجهزة منزلية'] || r.appliances)   || 0,
+        electronics:  parseFloat(r['إلكترونيات']   || r.electronics)  || 0,
+        staffCount:   parseFloat(r['عدد الموظفين'] || r.staffCount)   || 0,
+        nps:          r['NPS'] !== undefined ? r['NPS'] : (r.nps !== undefined ? r.nps : ''),
+        achievement:  String(r['نسبة الإنجاز'] || r.achievement || '0').replace('%',''),
+      }));
+      document.getElementById('syncLabel').textContent =
+        'آخر تحديث: ' + new Date().toLocaleTimeString('ar-LY') + ' — ' + allData.length + ' سجل';
+    } else {
+      throw new Error('no data');
+    }
+  } catch {
+    loadDemoData();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔄 تحديث';
+    renderAll();
+  }
+}
+
+function loadDemoData() {
+  allData = [
+    {ts:'2026-05-10 09:12', date:'2026-05-10', storeNum:'1', storeName:'حي الأثاري', region:'طرابلس', revenue:12400, footfall:320, transactions:87,  returns:3, appliances:7200, electronics:5200, staffCount:6, nps:8,  achievement:'82.7'},
+    {ts:'2026-05-10 09:45', date:'2026-05-10', storeNum:'2', storeName:'قرجي',       region:'طرابلس', revenue:9800,  footfall:280, transactions:71,  returns:2, appliances:5500, electronics:4300, staffCount:5, nps:7,  achievement:'65.3'},
+    {ts:'2026-05-10 10:03', date:'2026-05-10', storeNum:'3', storeName:'الكريمية',   region:'طرابلس', revenue:15200, footfall:410, transactions:112, returns:5, appliances:9100, electronics:6100, staffCount:7, nps:9,  achievement:'101.3'},
+    {ts:'2026-05-10 10:20', date:'2026-05-10', storeNum:'4', storeName:'زناتة',      region:'طرابلس', revenue:7600,  footfall:190, transactions:54,  returns:1, appliances:4200, electronics:3400, staffCount:4, nps:6,  achievement:'50.7'},
+    {ts:'2026-05-10 10:55', date:'2026-05-10', storeNum:'5', storeName:'الشط',       region:'طرابلس', revenue:11100, footfall:350, transactions:94,  returns:4, appliances:6600, electronics:4500, staffCount:6, nps:8,  achievement:'74.0'},
+    {ts:'2026-05-10 11:10', date:'2026-05-10', storeNum:'6', storeName:'الهواري 1',  region:'بنغازي',  revenue:13700, footfall:390, transactions:105, returns:3, appliances:8000, electronics:5700, staffCount:7, nps:9,  achievement:'91.3'},
+    {ts:'2026-05-10 11:35', date:'2026-05-10', storeNum:'7', storeName:'الهواري 2',  region:'بنغازي',  revenue:8900,  footfall:240, transactions:68,  returns:2, appliances:5100, electronics:3800, staffCount:5, nps:7,  achievement:'59.3'},
+    {ts:'2026-05-10 12:00', date:'2026-05-10', storeNum:'8', storeName:'المجوري',    region:'بنغازي',  revenue:10300, footfall:310, transactions:83,  returns:3, appliances:6000, electronics:4300, staffCount:6, nps:8,  achievement:'68.7'},
+  ];
+  document.getElementById('syncLabel').textContent = 'آخر تحديث: ' + new Date().toLocaleTimeString('ar-LY') + ' — بيانات تجريبية';
+}
+
+/* ── فلترة ── */
+function getFiltered() {
+  const region = document.getElementById('fRegion').value;
+  const store  = document.getElementById('fStore').value;
+  return allData.filter(r => {
+    if (region && (r.region || STORE_REGION[r.storeName] || '') !== region) return false;
+    if (store  && r.storeName !== store) return false;
+    return true;
+  });
+}
+
+/* ── رسم الكل ── */
+function renderAll() {
+  const d = getFiltered();
+  renderKPIs(d);
+  renderCharts(d);
+  renderBranches(d);
+  renderTable(d);
+}
+
+/* ── KPIs ── */
+function renderKPIs(d) {
+  const rev   = d.reduce((s,r)=>s+r.revenue,0);
+  const foot  = d.reduce((s,r)=>s+r.footfall,0);
+  const trans = d.reduce((s,r)=>s+r.transactions,0);
+  const conv  = foot  ? ((trans/foot)*100).toFixed(1) : '0';
+  const avg   = trans ? Math.round(rev/trans) : 0;
+
+  document.getElementById('k-rev').textContent   = rev.toLocaleString('ar-LY') + ' د.ل';
+  document.getElementById('k-foot').textContent  = foot.toLocaleString('ar-LY');
+  document.getElementById('k-trans').textContent = trans.toLocaleString('ar-LY');
+  document.getElementById('k-avg').textContent   = avg.toLocaleString('ar-LY');
+  document.getElementById('k-rev-s').textContent  = d.length + ' سجل';
+  document.getElementById('k-foot-s').textContent = d.length + ' فرع';
+  document.getElementById('k-conv').textContent   = 'معدل تحويل: ' + conv + '%';
+}
+
+/* ── Charts ── */
+function renderCharts(d) {
+  if (chartRev) chartRev.destroy();
+  if (chartCat) chartCat.destroy();
+
+  const labels = d.map(r => r.storeName);
+  const revs   = d.map(r => r.revenue);
+  const maxRev = Math.max(...revs);
+
+  Chart.defaults.color = '#666';
+  Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
+
+  chartRev = new Chart(document.getElementById('cRev'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'الإيرادات (د.ل)',
+        data: revs,
+        backgroundColor: revs.map(v => v === maxRev ? '#cc1111' : 'rgba(204,17,17,0.25)'),
+        borderRadius: 5,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { font: { family:'IBM Plex Sans Arabic', size: 11 } } },
+        y: { ticks: { callback: v => v.toLocaleString() } },
+      }
+    }
+  });
+
+  const totApp  = d.reduce((s,r)=>s+r.appliances,0);
+  const totElec = d.reduce((s,r)=>s+r.electronics,0);
+
+  chartCat = new Chart(document.getElementById('cCat'), {
+    type: 'doughnut',
+    data: {
+      labels: ['أجهزة منزلية', 'إلكترونيات'],
+      datasets: [{
+        data: [totApp, totElec],
+        backgroundColor: ['#cc1111', 'rgba(204,17,17,0.3)'],
+        borderWidth: 0, borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, cutout: '65%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { family:'IBM Plex Sans Arabic', size: 12 }, padding: 16 }
+        }
+      }
+    }
+  });
+}
+
+/* ── Branches grid ── */
+function renderBranches(d) {
+  const el = document.getElementById('branchesGrid');
+  if (!d.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;">لا توجد بيانات</div>'; return; }
+  el.innerHTML = d.map(r => {
+    const ach = parseFloat(r.achievement);
+    const c   = ach >= 80 ? '#4ade80' : ach >= 50 ? '#fbbf24' : '#f87171';
+    return `<div class="branch-row">
+      <div class="br-num">${r.storeNum}</div>
+      <div class="br-info">
+        <div class="br-name">${r.storeName}</div>
+        <div class="br-rev">${r.revenue.toLocaleString('ar-LY')} د.ل &nbsp;•&nbsp; ${r.transactions} فاتورة &nbsp;•&nbsp; ${r.region || STORE_REGION[r.storeName] || ''}</div>
+      </div>
+      <div class="br-ach" style="color:${c}">${r.achievement}%</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Table ── */
+function renderTable(d) {
+  const tb = document.getElementById('tBody');
+  if (!d.length) { tb.innerHTML = '<tr><td colspan="12" class="empty">لا توجد بيانات</td></tr>'; return; }
+  tb.innerHTML = d.map(r => {
+    const conv = r.footfall ? ((r.transactions/r.footfall)*100).toFixed(1)+'%' : '—';
+    const avg  = r.transactions ? Math.round(r.revenue/r.transactions).toLocaleString('ar-LY')+' د.ل' : '—';
+    const ach  = parseFloat(r.achievement);
+    const cls  = ach >= 80 ? 'ag' : ach >= 50 ? 'am' : 'al';
+    const reg  = r.region || STORE_REGION[r.storeName] || '—';
+    return `<tr>
+      <td style="color:var(--muted);font-size:11px;">${r.ts}</td>
+      <td>${r.date}</td>
+      <td><span class="sbadge"><span class="sdot"></span>${r.storeName}</span></td>
+      <td style="color:var(--muted);">${reg}</td>
+      <td style="font-weight:600;">${r.revenue.toLocaleString('ar-LY')} د.ل</td>
+      <td>${r.footfall.toLocaleString()}</td>
+      <td>${r.transactions.toLocaleString()}</td>
+      <td>${conv}</td>
+      <td>${avg}</td>
+      <td style="color:var(--muted);">${r.returns}</td>
+      <td>${r.nps !== '' ? r.nps+'/10' : '—'}</td>
+      <td><span class="apill ${cls}">${r.achievement}%</span></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── Export CSV ── */
+function exportCSV() {
+  const d = getFiltered();
+  const hdrs = ['وقت الإرسال','التاريخ','الفرع','المنطقة','الإيرادات','الزوار','الفواتير','المرتجعات','أجهزة','إلكترونيات','موظفين','NPS','الإنجاز'];
+  const rows = d.map(r => [r.ts,r.date,r.storeName,r.region||STORE_REGION[r.storeName]||'',r.revenue,r.footfall,r.transactions,r.returns,r.appliances,r.electronics,r.staffCount,r.nps,r.achievement+'%']);
+  const csv  = [hdrs,...rows].map(r=>r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'alfa-electric-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+}
+</script>
+</body>
+</html>

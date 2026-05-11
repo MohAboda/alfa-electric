@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALFA ELECTRIC — بوابة الفروع</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --red: #cc1111;
+    --red-dark: #991010;
+    --red-glow: rgba(204,17,17,0.13);
+    --red-border: rgba(204,17,17,0.4);
+    --gold: #c9a227;
+    --gold-glow: rgba(201,162,39,0.13);
+    --gold-border: rgba(201,162,39,0.4);
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f0f0;
+    --muted: #777;
+    --green: #22c55e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ══════════════════════════════════
+     شاشات — كل شاشة تُظهر/تُخفى
+  ══════════════════════════════════ */
+  .screen { display: none; }
+  .screen.active { display: flex; }
+
+  /* ══════════════════════════════════
+     شاشة تسجيل الدخول
+  ══════════════════════════════════ */
+  #s-login {
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .login-wrap { width: 100%; max-width: 400px; }
+
+  .login-brand {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .login-logo {
+    width: 68px; height: 68px;
+    background: var(--red);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700;
+    color: #fff; letter-spacing: 1px;
+    margin: 0 auto 1rem;
+    box-shadow: 0 0 40px rgba(204,17,17,0.25);
+  }
+
+  .login-brand-name {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .login-brand-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+  }
+
+  .login-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+
+  .login-field { margin-bottom: 1rem; }
+
+  .login-label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .login-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    direction: ltr;
+    text-align: right;
+  }
+  .login-input:focus { border-color: var(--red); background: var(--bg); }
+  .login-input::placeholder { color: #444; direction: rtl; }
+
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--red);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    transition: background 0.2s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .login-btn:hover { background: var(--red-dark); }
+  .login-btn:active { transform: scale(0.99); }
+
+  .login-error {
+    display: none;
+    background: rgba(204,17,17,0.1);
+    border: 1px solid rgba(204,17,17,0.3);
+    border-radius: 8px;
+    color: #f87171;
+    font-size: 13px;
+    padding: 10px 14px;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .login-hint {
+    margin-top: 1.25rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 11px; color: var(--muted);
+    line-height: 1.8;
+    border: 1px solid var(--border);
+  }
+  .login-hint strong { color: #aaa; display: block; margin-bottom: 4px; font-size: 11px; }
+
+  /* ══════════════════════════════════
+     شاشة اختيار الفرع (المالك فقط)
+  ══════════════════════════════════ */
+  #s-selector {
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .sel-header {
+    width: 100%;
+    background: var(--surface);
+    border-bottom: 1px solid var(--gold-border);
+    padding: 0 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 62px;
+    position: sticky; top: 0; z-index: 10;
+    flex-shrink: 0;
+  }
+
+  .owner-badge {
+    background: var(--gold-glow);
+    border: 1px solid var(--gold-border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px; font-weight: 600;
+    color: var(--gold);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .sel-body {
+    width: 100%;
+    max-width: 700px;
+    padding: 2rem 1.25rem;
+  }
+
+  .sel-title { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .sel-sub   { font-size: 12px; color: var(--muted); margin-bottom: 2rem; }
+
+  .region-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--muted); letter-spacing: 1.5px;
+    margin-bottom: 0.75rem; margin-top: 1.5rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .region-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .region-label:first-of-type { margin-top: 0; }
+
+  .branches-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .branch-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  }
+  .branch-card:hover {
+    border-color: var(--gold-border);
+    background: var(--gold-glow);
+    transform: translateY(-2px);
+  }
+  .branch-card:active { transform: scale(0.99); }
+
+  .bc-num {
+    width: 40px; height: 40px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .branch-card:hover .bc-num { background: var(--gold); color: #fff; border-color: var(--gold); }
+
+  .bc-info-name   { font-size: 14px; font-weight: 500; }
+  .bc-info-region { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .bc-arrow { margin-right: auto; font-size: 16px; color: var(--muted); transition: color 0.2s; }
+  .branch-card:hover .bc-arrow { color: var(--gold); }
+
+  /* ══════════════════════════════════
+     شاشة النموذج
+  ══════════════════════════════════ */
+  #s-form { flex-direction: column; min-height: 100vh; padding-bottom: 3rem; }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--red-border);
+    padding: 0 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 62px;
+    position: sticky; top: 0; z-index: 10;
+    flex-shrink: 0;
+  }
+  header.owner-hdr { border-bottom-color: var(--gold-border); }
+
+  .hdr-logo { display: flex; align-items: center; gap: 10px; }
+  .hdr-icon { width: 34px; height: 34px; background: var(--red); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
+  .hdr-icon.gold { background: var(--gold); }
+  .hdr-name { font-size: 14px; font-weight: 600; }
+  .hdr-sub  { font-size: 11px; color: var(--muted); }
+
+  .hdr-right { display: flex; align-items: center; gap: 8px; }
+
+  .store-tag {
+    background: var(--red-glow);
+    border: 1px solid var(--red-border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px; font-weight: 600;
+    color: var(--red);
+  }
+  .store-tag.gold { background: var(--gold-glow); border-color: var(--gold-border); color: var(--gold); }
+
+  .hdr-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 12px; padding: 5px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .hdr-btn:hover       { border-color: var(--red);  color: var(--red); }
+  .hdr-btn.back:hover  { border-color: var(--gold); color: var(--gold); }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem; }
+
+  .page-title { font-size: 20px; font-weight: 600; margin-bottom: 3px; }
+  .page-sub   { font-size: 12px; color: var(--muted); margin-bottom: 1.5rem; }
+
+  /* Banner */
+  .branch-banner {
+    background: var(--red-glow);
+    border: 1px solid var(--red-border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 1.25rem;
+    transition: all 0.2s;
+  }
+  .branch-banner.gold { background: var(--gold-glow); border-color: var(--gold-border); }
+
+  .bnum {
+    width: 46px; height: 46px;
+    background: var(--red);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .bnum.gold { background: var(--gold); }
+
+  .binfo { flex: 1; }
+  .binfo-name   { font-size: 16px; font-weight: 600; }
+  .binfo-region { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .lock-badge {
+    font-size: 11px; color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 5px; padding: 3px 8px;
+    flex-shrink: 0;
+  }
+  .lock-badge.owner { color: var(--gold); border-color: var(--gold-border); }
+
+  /* Section */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .sec-title {
+    font-size: 11px; font-weight: 600;
+    color: var(--red);
+    letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid1 { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .req { color: var(--red); }
+
+  .field input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    width: 100%; outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus { border-color: var(--red); background: var(--bg); }
+  .field input::placeholder { color: #3a3a3a; }
+  .field input[type="date"] { direction: ltr; text-align: right; }
+
+  /* KPI live */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .kpi-box {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 0.9rem;
+    text-align: center;
+  }
+  .kpi-lbl { font-size: 10px; color: var(--muted); margin-bottom: 5px; }
+  .kpi-val { font-size: 18px; font-weight: 600; color: var(--red); line-height: 1.2; }
+  .kpi-val.good { color: var(--green); }
+
+  /* NPS */
+  .nps-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; direction: ltr; justify-content: flex-end; }
+
+  .nps-btn {
+    width: 34px; height: 34px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+  }
+  .nps-btn:hover { border-color: var(--red); color: var(--text); }
+  .nps-btn.on { background: var(--red); border-color: var(--red); color: #fff; }
+
+  .nps-legend { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 5px; }
+
+  /* Submit */
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--red);
+    border: none; border-radius: 10px;
+    color: #fff;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 0.5rem;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .submit-btn:hover { background: var(--red-dark); }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem; left: 50%;
+    transform: translateX(-50%) translateY(120px);
+    border-radius: 10px;
+    padding: 13px 24px;
+    font-size: 14px; font-weight: 500;
+    transition: transform 0.35s cubic-bezier(.22,.68,0,1.3);
+    z-index: 999; white-space: nowrap;
+  }
+  .toast.ok  { background: #0d2e1a; border: 1px solid #1a7a3c; color: #4ade80; }
+  .toast.err { background: #2d0a0a; border: 1px solid var(--red); color: #f87171; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 520px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .kpi-strip { grid-template-columns: 1fr; }
+    .branches-grid { grid-template-columns: 1fr; }
+    .nps-btn { width: 30px; height: 30px; }
+    .sel-header { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     شاشة تسجيل الدخول
+════════════════════════════════════════ -->
+<div id="s-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <div class="login-logo">AE</div>
+      <div class="login-brand-name">ALFA ELECTRIC</div>
+      <div class="login-brand-sub">بوابة عمليات المتاجر — ليبيا</div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-card-title">تسجيل الدخول</div>
+
+      <div class="login-field">
+        <label class="login-label">اسم المستخدم</label>
+        <input type="text" class="login-input" id="uIn" placeholder="store01 أو اسم المالك"
+               autocomplete="username"
+               onkeydown="if(event.key==='Enter')document.getElementById('pIn').focus()">
+      </div>
+
+      <div class="login-field">
+        <label class="login-label">كلمة المرور</label>
+        <input type="password" class="login-input" id="pIn" placeholder="••••••••"
+               autocomplete="current-password"
+               onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+
+      <button class="login-btn" onclick="doLogin()">
+        <span>دخول</span>
+        <span>←</span>
+      </button>
+
+      <div class="login-error" id="loginErr">اسم المستخدم أو كلمة المرور غير صحيحة</div>
+    </div>
+
+    <div class="login-hint">
+      <strong>ملاحظة</strong>
+      كل فرع له بيانات دخول خاصة — لا يمكنك رؤية بيانات الفروع الأخرى.
+      في حال نسيت كلمة المرور، تواصل مع الإدارة المركزية.
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     شاشة اختيار الفرع — المالك فقط
+════════════════════════════════════════ -->
+<div id="s-selector" class="screen">
+  <div class="sel-header">
+    <div class="hdr-logo">
+      <div class="hdr-icon gold">AE</div>
+      <div>
+        <div class="hdr-name">ALFA ELECTRIC</div>
+        <div class="hdr-sub">وضع المالك</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <a href="./admin.html" class="hdr-btn" style="border-color:var(--gold-border);color:var(--gold);">📊 لوحة الإدارة</a>
+      <div class="owner-badge">★ مالك النظام</div>
+      <button class="hdr-btn" onclick="doLogout()">خروج</button>
+    </div>
+  </div>
+
+  <div class="sel-body">
+    <div class="sel-title">اختر الفرع</div>
+    <div class="sel-sub">يمكنك إدخال بيانات أي فرع من الفروع الثمانية</div>
+
+    <div class="region-label">منطقة طرابلس</div>
+    <div class="branches-grid" id="grid-tripoli"></div>
+
+    <div class="region-label">منطقة بنغازي</div>
+    <div class="branches-grid" id="grid-benghazi"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     شاشة النموذج
+════════════════════════════════════════ -->
+<div id="s-form" class="screen">
+  <header id="formHeader">
+    <div class="hdr-logo">
+      <div class="hdr-icon" id="hdrIcon">AE</div>
+      <div>
+        <div class="hdr-name">ALFA ELECTRIC</div>
+        <div class="hdr-sub">بوابة عمليات المتاجر</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="store-tag" id="hdrTag">—</div>
+      <button class="hdr-btn back" id="backBtn" onclick="goBack()">← اختر فرع آخر</button>
+      <a href="./index.html" class="hdr-btn">🏠</a>
+      <button class="hdr-btn" onclick="doLogout()">خروج</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-title">تسجيل البيانات اليومية</div>
+    <div class="page-sub" id="todayStr">—</div>
+
+    <!-- بطاقة الفرع المقفلة -->
+    <div class="branch-banner" id="branchBanner">
+      <div class="bnum" id="bNum">—</div>
+      <div class="binfo">
+        <div class="binfo-name"   id="bName">—</div>
+        <div class="binfo-region" id="bRegion">—</div>
+      </div>
+      <div class="lock-badge" id="lockBadge">🔒 مقفل</div>
+    </div>
+
+    <!-- المبيعات -->
+    <div class="section">
+      <div class="sec-title">بيانات المبيعات</div>
+      <div class="grid2">
+        <div class="field">
+          <label>التاريخ <span class="req">*</span></label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="field">
+          <label>الهدف الشهري (د.ل)</label>
+          <input type="number" id="f-target" placeholder="مثال: 50000" min="0" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>إجمالي الإيرادات (د.ل) <span class="req">*</span></label>
+          <input type="number" id="f-rev" placeholder="0" min="0" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>عدد الزوار <span class="req">*</span></label>
+          <input type="number" id="f-foot" placeholder="0" min="0" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>عدد الفواتير <span class="req">*</span></label>
+          <input type="number" id="f-trans" placeholder="0" min="0" oninput="recalc()">
+        </div>
+        <div class="field">
+          <label>المرتجعات</label>
+          <input type="number" id="f-ret" placeholder="0" min="0">
+        </div>
+      </div>
+
+      <!-- KPIs لحظية -->
+      <div class="kpi-strip">
+        <div class="kpi-box">
+          <div class="kpi-lbl">معدل التحويل</div>
+          <div class="kpi-val" id="kv-conv">—</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-lbl">متوسط الفاتورة</div>
+          <div class="kpi-val" id="kv-basket">—</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-lbl">نسبة الإنجاز</div>
+          <div class="kpi-val" id="kv-ach">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- الفئات -->
+    <div class="section">
+      <div class="sec-title">توزيع الفئات</div>
+      <div class="grid2">
+        <div class="field">
+          <label>أجهزة منزلية (د.ل)</label>
+          <input type="number" id="f-app" placeholder="0" min="0">
+        </div>
+        <div class="field">
+          <label>إلكترونيات (د.ل)</label>
+          <input type="number" id="f-elec" placeholder="0" min="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- الكوادر والرضا -->
+    <div class="section">
+      <div class="sec-title">الكوادر والرضا</div>
+      <div class="grid2">
+        <div class="field">
+          <label>عدد الموظفين اليوم <span class="req">*</span></label>
+          <input type="number" id="f-staff" placeholder="0" min="0">
+        </div>
+        <div class="field"></div>
+      </div>
+
+      <div style="margin-top:1rem;">
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:8px;">
+          تقييم رضا العملاء — NPS <span style="opacity:.5;">(0 = أدنى | 10 = أعلى)</span>
+        </label>
+        <div class="nps-row" id="npsRow"></div>
+        <div class="nps-legend"><span>سيئ جداً</span><span>ممتاز</span></div>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+      إرسال البيانات إلى السحابة
+      <span>←</span>
+    </button>
+  </div>
+</div>
+
+<div class="toast ok"  id="t-ok">✓ تم الإرسال بنجاح!</div>
+<div class="toast err" id="t-err">⚠ فشل الإرسال، تحقق من الاتصال</div>
+
+<script>
+/* ════════════════════════════════════════════
+   إعدادات النظام — عدّل بيانات الدخول هنا
+   ════════════════════════════════════════════ */
+
+const OWNER = {
+  username: 'alfa_owner',
+  password: 'Owner@Alfa2026',
+};
+
+const BRANCHES = {
+  'store01': { pw:'Athar@2026',  num:'1', name:'حي الأثاري', region:'طرابلس' },
+  'store02': { pw:'Gurji@2026',  num:'2', name:'قرجي',       region:'طرابلس' },
+  'store03': { pw:'Karem@2026',  num:'3', name:'الكريمية',   region:'طرابلس' },
+  'store04': { pw:'Zanat@2026',  num:'4', name:'زناتة',      region:'طرابلس' },
+  'store05': { pw:'Shatt@2026',  num:'5', name:'الشط',       region:'طرابلس' },
+  'store06': { pw:'Hw1@2026',    num:'6', name:'الهواري 1',  region:'بنغازي' },
+  'store07': { pw:'Hw2@2026',    num:'7', name:'الهواري 2',  region:'بنغازي' },
+  'store08': { pw:'Majour@2026', num:'8', name:'المجوري',    region:'بنغازي' },
+};
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhbjgJ1-rekjb645dOqjQfKv-CGex0cB73yvghtr5740e2Jh8eLJ87uYiPtL13WEnv5Q/exec';
+
+/* ════════════════════════════════════════════ */
+
+let currentBranch = null;
+let isOwner = false;
+let npsVal  = null;
+
+/* ── تسجيل الدخول ── */
+function doLogin() {
+  const u   = document.getElementById('uIn').value.trim().toLowerCase();
+  const p   = document.getElementById('pIn').value;
+  const err = document.getElementById('loginErr');
+  err.style.display = 'none';
+
+  if (u === OWNER.username && p === OWNER.password) {
+    isOwner = true;
+    buildSelector();
+    showScreen('s-selector');
+    return;
+  }
+
+  if (BRANCHES[u] && BRANCHES[u].pw === p) {
+    isOwner = false;
+    currentBranch = BRANCHES[u];
+    buildForm();
+    showScreen('s-form');
+    return;
+  }
+
+  err.style.display = 'block';
+  document.getElementById('pIn').value = '';
+  document.getElementById('pIn').focus();
+}
+
+/* ── تسجيل الخروج ── */
+function doLogout() {
+  currentBranch = null;
+  isOwner = false;
+  npsVal  = null;
+  document.getElementById('uIn').value = '';
+  document.getElementById('pIn').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+  showScreen('s-login');
+}
+
+/* ── بناء شاشة الاختيار (المالك) ── */
+function buildSelector() {
+  ['tripoli','benghazi'].forEach(r => document.getElementById('grid-'+r).innerHTML = '');
+
+  Object.entries(BRANCHES).forEach(([key, b]) => {
+    const card = document.createElement('div');
+    card.className = 'branch-card';
+    card.innerHTML = `
+      <div class="bc-num">${b.num}</div>
+      <div class="bc-info">
+        <div class="bc-info-name">${b.name}</div>
+        <div class="bc-info-region">${b.region}</div>
+      </div>
+      <div class="bc-arrow">←</div>`;
+    card.onclick = () => { currentBranch = b; buildForm(); showScreen('s-form'); };
+    document.getElementById(b.region === 'طرابلس' ? 'grid-tripoli' : 'grid-benghazi').appendChild(card);
+  });
+}
+
+/* ── بناء النموذج ── */
+function buildForm() {
+  const b = currentBranch;
+  const header = document.getElementById('formHeader');
+  const icon   = document.getElementById('hdrIcon');
+  const tag    = document.getElementById('hdrTag');
+  const banner = document.getElementById('branchBanner');
+  const bnum   = document.getElementById('bNum');
+  const lock   = document.getElementById('lockBadge');
+  const backBtn= document.getElementById('backBtn');
+
+  if (isOwner) {
+    header.classList.add('owner-hdr');
+    icon.classList.add('gold');
+    tag.classList.add('gold');
+    tag.textContent = '★ ' + b.name;
+    banner.classList.add('gold');
+    bnum.classList.add('gold');
+    lock.classList.add('owner');
+    lock.textContent = '★ وضع المالك';
+    backBtn.style.display = 'inline-flex';
+  } else {
+    header.classList.remove('owner-hdr');
+    icon.classList.remove('gold');
+    tag.classList.remove('gold');
+    tag.textContent = 'فرع ' + b.name;
+    banner.classList.remove('gold');
+    bnum.classList.remove('gold');
+    lock.classList.remove('owner');
+    lock.textContent = '🔒 مقفل';
+    backBtn.style.display = 'none';
+  }
+
+  document.getElementById('bNum').textContent    = b.num;
+  document.getElementById('bName').textContent   = b.name;
+  document.getElementById('bRegion').textContent = b.region + ' — فرع رقم ' + b.num;
+
+  const now = new Date();
+  document.getElementById('f-date').value = now.toISOString().split('T')[0];
+  document.getElementById('todayStr').textContent =
+    'يوم ' + now.toLocaleDateString('ar-LY', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  /* NPS */
+  const row = document.getElementById('npsRow');
+  row.innerHTML = '';
+  npsVal = null;
+  for (let i = 0; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className   = 'nps-btn';
+    btn.textContent = i;
+    btn.onclick = () => {
+      npsVal = i;
+      row.querySelectorAll('.nps-btn').forEach(x => x.classList.remove('on'));
+      btn.classList.add('on');
+    };
+    row.appendChild(btn);
+  }
+
+  /* تنظيف */
+  ['f-target','f-rev','f-foot','f-trans','f-ret','f-app','f-elec','f-staff']
+    .forEach(id => document.getElementById(id).value = '');
+  recalc();
+}
+
+/* ── عودة المالك لاختيار الفرع ── */
+function goBack() {
+  currentBranch = null;
+  showScreen('s-selector');
+}
+
+/* ── تبديل الشاشات ── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ── KPIs لحظية ── */
+function recalc() {
+  const rev    = parseFloat(document.getElementById('f-rev').value)   || 0;
+  const foot   = parseFloat(document.getElementById('f-foot').value)  || 0;
+  const trans  = parseFloat(document.getElementById('f-trans').value) || 0;
+  const target = parseFloat(document.getElementById('f-target').value)|| 0;
+
+  document.getElementById('kv-conv').textContent   = foot  > 0 ? ((trans/foot)*100).toFixed(1)+'%' : '—';
+  document.getElementById('kv-basket').textContent = trans > 0 ? Math.round(rev/trans).toLocaleString('ar-LY')+' د.ل' : '—';
+
+  const achEl = document.getElementById('kv-ach');
+  if (target > 0) {
+    const pct = (rev/target)*100;
+    achEl.textContent = pct.toFixed(1)+'%';
+    achEl.classList.toggle('good', pct >= 80);
+  } else {
+    achEl.textContent = '—';
+    achEl.classList.remove('good');
+  }
+}
+
+/* ── إرسال البيانات ── */
+async function submitForm() {
+  const b     = currentBranch;
+  const date  = document.getElementById('f-date').value;
+  const rev   = document.getElementById('f-rev').value;
+  const foot  = document.getElementById('f-foot').value;
+  const trans = document.getElementById('f-trans').value;
+  const staff = document.getElementById('f-staff').value;
+
+  if (!date || !rev || !foot || !trans || !staff) {
+    alert('يرجى ملء جميع الحقول المطلوبة (*)');
+    return;
+  }
+
+  const revN   = parseFloat(rev);
+  const target = parseFloat(document.getElementById('f-target').value) || 0;
+
+  const payload = {
+    date,
+    storeNum:     b.num,
+    storeName:    b.name,
+    region:       b.region,
+    submittedBy:  isOwner ? 'owner' : 'manager',
+    revenue:      revN,
+    footfall:     parseFloat(foot),
+    transactions: parseFloat(trans),
+    returns:      parseFloat(document.getElementById('f-ret').value)  || 0,
+    appliances:   parseFloat(document.getElementById('f-app').value)  || 0,
+    electronics:  parseFloat(document.getElementById('f-elec').value) || 0,
+    staffCount:   parseFloat(staff) || 0,
+    nps:          npsVal !== null ? npsVal : '',
+    achievement:  target > 0 ? ((revN/target)*100).toFixed(1) : '0',
+  };
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span>جاري الإرسال...</span>';
+
+  try {
+    const res  = await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify(payload) });
+    const json = await res.json();
+    if (json.result === 'success') {
+      showToast('t-ok');
+      setTimeout(() => {
+        ['f-target','f-rev','f-foot','f-trans','f-ret','f-app','f-elec','f-staff']
+          .forEach(id => document.getElementById(id).value = '');
+        npsVal = null;
+        document.querySelectorAll('.nps-btn').forEach(x => x.classList.remove('on'));
+        recalc();
+        if (isOwner) setTimeout(() => goBack(), 1000);
+      }, 1500);
+    } else { throw new Error(); }
+  } catch {
+    showToast('t-err', 4500);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'إرسال البيانات إلى السحابة <span>←</span>';
+  }
+}
+
+/* ── Toast ── */
+function showToast(id, ms = 3000) {
+  const el = document.getElementById(id);
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), ms);
+}
+</script>
+</body>
+</html>
