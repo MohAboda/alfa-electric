@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALFA ELECTRIC — النظام المركزي</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --red: #cc1111;
+    --red-dark: #991010;
+    --red-glow: rgba(204,17,17,0.15);
+    --gold: #c9a227;
+    --gold-glow: rgba(201,162,39,0.15);
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f0f0;
+    --muted: #777;
+    --green: #22c55e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .brand {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .logo {
+    width: 80px; height: 80px;
+    background: var(--red);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px; font-weight: 700;
+    color: #fff; letter-spacing: 2px;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 0 40px rgba(204,17,17,0.3);
+  }
+
+  .brand-name {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .brand-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .brand-loc {
+    font-size: 12px;
+    color: var(--red);
+    font-weight: 500;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: var(--text);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--red);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover::before {
+    opacity: 1;
+  }
+
+  .card:hover {
+    border-color: var(--red);
+    background: var(--red-glow);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+
+  .card-icon {
+    width: 56px; height: 56px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 1.25rem;
+    transition: all 0.3s;
+  }
+
+  .card:hover .card-icon {
+    background: var(--red);
+    border-color: var(--red);
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--red);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+
+  .card:hover .card-btn {
+    background: var(--red-dark);
+  }
+
+  .card-admin::before {
+    background: var(--gold);
+  }
+
+  .card-admin:hover {
+    border-color: var(--gold);
+    background: var(--gold-glow);
+  }
+
+  .card-admin:hover .card-icon {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .card-admin .card-btn {
+    background: var(--gold);
+    color: #000;
+  }
+
+  .card-admin:hover .card-btn {
+    background: #b8941f;
+  }
+
+  .footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .footer a {
+    color: var(--red);
+    text-decoration: none;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 1rem;
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  @media (max-width: 600px) {
+    .cards {
+      grid-template-columns: 1fr;
+    }
+    .brand-name {
+      font-size: 22px;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="brand">
+    <div class="logo">AE</div>
+    <div class="brand-name">ALFA ELECTRIC</div>
+    <div class="brand-sub">نظام إدارة عمليات المتاجر</div>
+    <div class="brand-loc">طرابلس — بنغازي • 8 فروع</div>
+    <div class="status-bar">
+      <div class="status-dot"></div>
+      <span>النظام متصل بالسحابة</span>
+    </div>
+  </div>
+
+  <div class="cards">
+    <!-- بوابة الفروع -->
+    <a href="./store_form_online.html" class="card">
+      <div class="card-icon">🏪</div>
+      <div class="card-title">بوابة الفروع</div>
+      <div class="card-desc">
+        تسجيل البيانات اليومية<br>
+        المبيعات • الزوار • الفواتير<br>
+        للمديرين ومالك النظام
+      </div>
+      <div class="card-btn">
+        الدخول للبوابة
+        <span>←</span>
+      </div>
+    </a>
+
+    <!-- لوحة الإدارة -->
+    <a href="./admin_online.html" class="card card-admin">
+      <div class="card-icon">📊</div>
+      <div class="card-title">لوحة الإدارة</div>
+      <div class="card-desc">
+        متابعة الأداء والتحليلات<br>
+        رسوم بيانية • تقارير • تصدير<br>
+        للإدارة المركزية فقط
+      </div>
+      <div class="card-btn">
+        الدخول للوحة
+        <span>←</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="footer">
+    <p>© 2026 ALFA ELECTRIC — Libya</p>
+    <p style="margin-top:6px;">في حال مشاكل تقنية: <a href="mailto:support@alfaelectric.ly">support@alfaelectric.ly</a></p>
+  </div>
+
+</body>
+</html>
